@@ -3,7 +3,7 @@ import axiosClient from './axiosClient'
 const postApi = {
   getAll(params) {
     const url = '/posts'
-    return axiosClient.get(url, { params })
+    return axiosClient.get(url, { params})
   },
 
   getById(id) {
@@ -20,8 +20,8 @@ const postApi = {
   },
   updateFormData(data) {
     const url = `/posts/${data.id}`
-    return axiosClient.patch(url, data,{
-        headers: { 'Content-Type': 'multipart/form-data' },
+    return axiosClient.patch(url, data, {
+      headers: { 'Content-Type': 'multipart/form-data' },
     })
   },
   remove(id) {
