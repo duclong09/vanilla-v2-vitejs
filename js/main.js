@@ -1,4 +1,5 @@
 import axiosClient from './api/axiosClient'
+import { getAllCities, getCityById } from './api/cityApi'
 import postApi from './api/postApi'
 
 console.log('long')
