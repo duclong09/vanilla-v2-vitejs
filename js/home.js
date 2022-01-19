@@ -20,7 +20,7 @@ function createPostElement(post) {
   // if(titleElement) titleElement.textContent = post.title
 
   setTextContent(liElement, '[data-id="title"]', post.title)
-  setTextContent(liElement, '[data-id="description"]',truncateText(post.description,100))
+  setTextContent(liElement, '[data-id="description"]', truncateText(post.description, 100))
   setTextContent(liElement, '[data-id="author"]', post.author)
 
   // const descriptionElement = liElement.querySelector('[data-id="description"]')
@@ -58,14 +58,73 @@ function renderPostList(postList) {
   })
 }
 
-;(async () => {
+function renderPagination(pagination) {
+  const ulPagination = document.getElementById('pagination')
+  if(!pagination || !ulPagination) return
+  const {_page,_limit,_totalRows} = pagination
+  //calc totalPages
+  const totalPages = Math.ceil(_totalRows / _limit)
+
+  //save page and totoalPages to ulPagination
+  ulPagination.dataset.page = _page
+  ulPagination.dataset.totalPages = totalPages
+  //check if enaable / disable prev/next link
+  if(_page <= 1) ulPagination.firstElementChild?.classList.add('disabled')
+  else ulPagination.firstElementChild?.classList.remove('disable')
+
+  if(_page >= totalPages) ulPagination.lastElementChild?.classList.add('disabled')
+  else ulPagination.lastElementChild?.classList.remove('disable')
+}
+
+function handleFilterChange(filterName, filterValue) {
+  const url = new URL(window.location)
+  url.searchParams.set(filterName, filterValue)
+  history.pushState({}, '', url)
+}
+
+
+function handlePrevClick(e) {
+  e.preventDefault()
+  console.log('click')
+}
+function handleNextClick(e) {
+  e.preventDefault()
+  console.log('click')
+}
+
+function initPagination() {
+  const ulPagination = document.getElementById('pagination')
+  if (!ulPagination) return
+
+  //add click event for prev link
+  const prevLink = ulPagination.firstElementChild?.firstElementChild
+  if (prevLink) {
+    prevLink.addEventListener('click', handlePrevClick)
+  }
+  //add click event for next link
+  const nextLink = ulPagination.lastElementChild?.lastElementChild
+  if (nextLink) {
+    nextLink.addEventListener('click', handleNextClick)
+  }
+}
+
+function initURL() {
+  const url = new URL(window.location)
+  //update search params if needed
+  if (!url.searchParams.get('_page')) url.searchParams.set('_page', 1)
+  if (!url.searchParams.get('_limit')) url.searchParams.set('_limit', 6)
+  history.pushState({}, '', url)
+}
+
+; (async () => {
   try {
-    const queryParams = {
-      _page: 1,
-      _limit: 5,
-    }
+    initPagination()
+    initURL()
+    const queryParams = new URLSearchParams(window.location.search)
+    //set defaul
     const { data, pagination } = await postApi.getAll(queryParams)
     renderPostList(data)
+    renderPagination(pagination)
   } catch (error) {
     console.log('get all failed', error)
   }
