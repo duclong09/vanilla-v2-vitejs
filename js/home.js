@@ -1,5 +1,6 @@
 import postApi from './api/postApi'
 import { getUlPagination, setTextContent, truncateText } from './utils'
+import debounce from 'lodash.debounce'
 
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
@@ -48,7 +49,7 @@ function createPostElement(post) {
 
 function renderPostList(postList) {
   console.log({ postList })
-  if (!Array.isArray(postList) || postList.length === 0) return
+  if (!Array.isArray(postList)) return
   const ulElement = document.getElementById('postsList')
   if (!ulElement) return
   //clear current list
@@ -81,14 +82,16 @@ async function handleFilterChange(filterName, filterValue) {
   try {
     const url = new URL(window.location)
     url.searchParams.set(filterName, filterValue)
-    history.pushState({}, '', url)
 
+    if(filterName === 'title_like') url.searchParams.set('_page', 1)
+
+    history.pushState({}, '', url)
     //fetch API
     const { data, pagination } = await postApi.getAll(url.searchParams)
     renderPostList(data)
     renderPagination(pagination)
   } catch (error) {
-    console.log('failed to fetch post list', error);
+    console.log('failed to fetch post list', error)
   }
 }
 
@@ -141,9 +144,27 @@ function initURL() {
   history.pushState({}, '', url)
 }
 
+function initSearch() {
+  const searchInput = document.getElementById('searchInput')
+  if (!searchInput) return
+  //set default values from query params
+
+  //title search
+  const queryParams = new URLSearchParams(window.location.search)
+  if(queryParams.get('title_like')){
+    searchInput.value = queryParams.get('title_like')
+  }
+  const debounceSearch = debounce(
+    (event) => handleFilterChange('title_like', event.target.value),
+    500
+  )
+  searchInput.addEventListener('input', debounceSearch)
+}
+
 ;(async () => {
   try {
     initPagination()
+    initSearch()
     initURL()
     const queryParams = new URLSearchParams(window.location.search)
     //set defaul
