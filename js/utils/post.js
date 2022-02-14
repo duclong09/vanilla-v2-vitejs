@@ -41,7 +41,15 @@ export function createPostElement(post) {
       thumbnailElement.src = 'https://via.placeholder.com/1368x400?text=thumbnail'
     })
   }
-
+  //attach event
+  //go to post detail when click on div.post-item
+  const divElement = liElement.firstElementChild
+  if(divElement){
+    divElement.addEventListener('click', () =>{
+      window.location.assign(`/post-detail.html?id=${post.id}`)
+    })
+  }
+ 
   return liElement
 }
 
