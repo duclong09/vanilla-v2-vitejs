@@ -1,0 +1,6 @@
+form.validated input.form-control:valid{
+    background: aliceblue;
+}
+form.validated input.form-control:invalid{
+    background: bisque;
+}
