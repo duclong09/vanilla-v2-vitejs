@@ -1,4 +1,5 @@
-import { setBackgroundImage } from "./common"
+
+import { setBackgroundImage, setTextContent } from "./common"
 import { setFieldValue } from "./common"
 
 function setFormValues(form, formValues){
@@ -29,6 +30,50 @@ function getFormValues(form){
     return formValues
 }
 
+function getTitleError(form){
+    const titleElement = form.querySelector('[name="title"]')
+    if(!titleElement) return
+    if(titleElement.validity.valueMissing) return 'Ooops! Please write a nice title for your post'
+
+    if(titleElement.value.split(' ').filter((x) => !! x && x.length >= 3).length < 2){
+        return 'Please enter at least two words of 3 character'
+    }
+    return ''
+}
+
+function getAuthorError(form){
+    const authorElement = form.querySelector('[name="author"]')
+    if(!authorElement) return
+    if(authorElement.validity.valueMissing) return 'Please enter author of this post!'
+
+    if(authorElement.value.split(' ').filter((x) => !! x && x.length >=3).length < 2){
+        return 'Please enter at least two words of 3 character'
+    }
+    return ''
+}
+
+
+function validatePostForm(form, formValues){
+
+    //get errors
+    const errors = {
+        title: getTitleError(form),
+        author: getAuthorError(form)
+    }
+    //set errors
+    for(const key in errors){
+     const element = form.querySelector(`[name="${key}"]`)
+     if(element){
+        element.setCustomValidity(errors[key])
+        setTextContent(element.parentElement, '.invalid-feedback', errors[key])
+     }   
+    }
+    //add was-validated class to form element
+    const isValid = form.checkValidity()
+    if(!isValid) form.classList.add('was-validated')
+    return false
+}
+
 export function initPostForm({formId, defaultValues, onSubmit}){
     const form = document.getElementById(formId)
     if(!form) return
@@ -41,7 +86,7 @@ export function initPostForm({formId, defaultValues, onSubmit}){
         const formValues = getFormValues(form)
         console.log(formValues)
         //validation js
-
+        if(!validatePostForm(form,formValues)) return
 
         //trigger submit callback
 
