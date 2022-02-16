@@ -1,6 +1,6 @@
 import postApi from './api/postApi'
-
-    ; (async () => {
+import { initPostForm } from './utils';   
+ (async () => {
         try {
             const searchParams = new URLSearchParams(window.location.search)
             const postId = searchParams.get('id')
@@ -11,9 +11,16 @@ import postApi from './api/postApi'
                 author: '',
                 imageUrl: '',
             }
-            console.log('id', postId)
-            console.log('mode:', postId ? 'edit' : 'add')
-            console.log('defaultValues:', defaultValues)
+            // console.log('id', postId)
+            // console.log('mode:', postId ? 'edit' : 'add')
+            // console.log('defaultValues:', defaultValues)
+
+
+            initPostForm({
+                formId: 'postForm',
+                defaultValues,
+                onSubmit: (formValues) => console.log('submit', formValues)
+            })
         } catch (error) {
             console.log('faild to fetch post details: ', error)
         }
