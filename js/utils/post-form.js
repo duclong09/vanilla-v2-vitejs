@@ -58,7 +58,7 @@ function validatePostForm(form, formValues){
     //get errors
     const errors = {
         title: getTitleError(form),
-        author: getAuthorError(form)
+        author: getAuthorError(form),
     }
     //set errors
     for(const key in errors){
