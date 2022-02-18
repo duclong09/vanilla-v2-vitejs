@@ -114,14 +114,36 @@ async function validatePostForm(form, formValues) {
   return isValid
 }
 
+function showLoading(form){
+  const button = form.querySelector('[name="submit"]')
+  if(button){
+    button.disabled = true
+    button.textContent = 'Saving...'
+  }
+}
+
+function hideLoading(form){
+  const button = form.querySelector('[name="submit"]')
+  if(button){
+    button.disabled = false
+    button.textContent = 'Save'
+  }
+}
+
 export function initPostForm({ formId, defaultValues, onSubmit }) {
   const form = document.getElementById(formId)
   if (!form) return
-  
+  let submitting = false
   setFormValues(form, defaultValues)
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault()
+    //prevent other submitssion
+    if(submitting) return
+
+    //show loading / disable button
+    showLoading(form)
+    submitting = true
     //console.log('form', form)
     //get form value
     const formValues = getFormValues(form)
@@ -133,7 +155,9 @@ export function initPostForm({ formId, defaultValues, onSubmit }) {
     if (!isValid) return
 
     //trigger submit callback
-    onSubmit?.(formValues)
+    await onSubmit?.(formValues)
     //otherwise, show validation errors
+    hideLoading(form)
+    submitting = false
   })
 }
