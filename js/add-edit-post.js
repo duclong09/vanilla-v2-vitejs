@@ -1,5 +1,27 @@
 import postApi from './api/postApi'
 import { initPostForm } from './utils';   
+
+async function handlePostFormSubmit(formValues){
+    //console.log('submit from parent', formValues)
+    try {
+        //check add/ edit
+        //v1: based on search params check id
+        //v2: check id in formValues
+
+        //call api
+        const savedPost = formValues.id
+            ? await postApi.update(formValues)
+            : await postApi.add(formValues)
+      
+        //show success message
+        //redirect to detail page
+        window.location.assign(`/post-detail.html?id=${savedPost.id}`)
+        console.log('redirect form values', savedPost.id)
+    } catch (error) {
+        console.log('failed to save post', error)
+    }
+}
+
  (async () => {
         try {
             const searchParams = new URLSearchParams(window.location.search)
@@ -19,7 +41,7 @@ import { initPostForm } from './utils';
             initPostForm({
                 formId: 'postForm',
                 defaultValues,
-                onSubmit: (formValues) => console.log('submit', formValues)
+                onSubmit: handlePostFormSubmit
             })
         } catch (error) {
             console.log('faild to fetch post details: ', error)

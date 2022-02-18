@@ -111,25 +111,29 @@ async function validatePostForm(form, formValues) {
   //add was-validated class to form element
   const isValid = form.checkValidity()
   if (!isValid) form.classList.add('was-validated')
-  return false
+  return isValid
 }
 
 export function initPostForm({ formId, defaultValues, onSubmit }) {
   const form = document.getElementById(formId)
   if (!form) return
-  console.log('form', form)
+  
   setFormValues(form, defaultValues)
 
-  form.addEventListener('submit', (event) => {
+  form.addEventListener('submit', async (event) => {
     event.preventDefault()
+    //console.log('form', form)
     //get form value
     const formValues = getFormValues(form)
-    console.log(formValues)
+    //console.log(formValues)
+    formValues.id = defaultValues.id
+
+    const isValid = await validatePostForm(form, formValues)
     //validation js
-    if (!validatePostForm(form, formValues)) return
+    if (!isValid) return
 
     //trigger submit callback
-
+    onSubmit?.(formValues)
     //otherwise, show validation errors
   })
 }
