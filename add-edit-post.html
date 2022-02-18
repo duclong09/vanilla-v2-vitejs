@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Add edit post</title>
-    <link rel="stylesheet" href="./styles/form.css">
+    <link rel="stylesheet" href="./styles/form.css" />
     <link rel="shortcut icon" href="images/logo.png" type="image/png" />
 
     <!-- Bootstrap CSS -->
@@ -77,7 +77,7 @@
                   type="text"
                   class="form-control"
                   name="title"
-                  placeholder="Eg: Learning JS is fun" 
+                  placeholder="Eg: Learning JS is fun"
                   required
                 />
                 <div class="invalid-feedback">
@@ -108,16 +108,19 @@
                   We&apos;re using
                   <a href="https://picsum.photos">Picsum service</a> to get a random image.
                 </small>
-                <input type="hidden" name="imageUrl" />
+                <input type="text" name="imageUrl" class="d-none" />
                 <div>
                   <button type="button" id="postChangeImage" class="btn btn-dark">
                     Change post image
                   </button>
                 </div>
+                <div class="invalid-feedback"></div>
               </div>
 
               <div class="text-center">
-                <button name="submit" class="btn btn-primary"><i class="fas fa-save mr-1"></i> Save</button>
+                <button name="submit" class="btn btn-primary">
+                  <i class="fas fa-save mr-1"></i> Save
+                </button>
               </div>
             </form>
           </div>
