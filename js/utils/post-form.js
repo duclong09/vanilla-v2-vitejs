@@ -1,6 +1,7 @@
 import { setBackgroundImage, setTextContent } from './common'
 import { setFieldValue } from './common'
 import * as yup from 'yup'
+import { randomNumber } from '.'
 
 function setFormValues(form, formValues) {
   setFieldValue(form, '[name="title"]', formValues?.title)
@@ -63,6 +64,10 @@ function getPostSchema() {
         (value) => value.split(' ').filter((x) => !!x && x.length >= 3).length >= 2
       ),
     description: yup.string(),
+    imageUrl: yup
+      .string()
+      .required('Please random a background image')
+      .url('Please enter a valid URL'),
   })
 }
 
@@ -90,7 +95,7 @@ async function validatePostForm(form, formValues) {
   //   }
   try {
     //reset previous errors
-    ;['title', 'author'].forEach((name) => setFieldError(form, name, ''))
+    ;['title', 'author', 'imageUrl'].forEach((name) => setFieldError(form, name, ''))
     //validation
     const schema = getPostSchema()
     await schema.validate(formValues, { abortEarly: false })
@@ -114,32 +119,49 @@ async function validatePostForm(form, formValues) {
   return isValid
 }
 
-function showLoading(form){
+function showLoading(form) {
   const button = form.querySelector('[name="submit"]')
-  if(button){
+  if (button) {
     button.disabled = true
     button.textContent = 'Saving...'
   }
 }
 
-function hideLoading(form){
+function hideLoading(form) {
   const button = form.querySelector('[name="submit"]')
-  if(button){
+  if (button) {
     button.disabled = false
     button.textContent = 'Save'
   }
 }
 
+function initRandomImage(form) {
+  const randomButton = document.getElementById('postChangeImage')
+  if (!randomButton) return
+  randomButton.addEventListener('click', () => {
+    //random id
+    //build url
+    const imageUrl = `https://picsum.photos/id/${randomNumber(1000)}/1368/400`
+    //set imgUrl input + background
+    setFieldValue(form, '[name="imageUrl"]', imageUrl)
+    setBackgroundImage(document, '#postHeroImage', imageUrl)
+  })
+}
+
 export function initPostForm({ formId, defaultValues, onSubmit }) {
   const form = document.getElementById(formId)
   if (!form) return
+
   let submitting = false
   setFormValues(form, defaultValues)
+
+  //init Event
+  initRandomImage(form)
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault()
     //prevent other submitssion
-    if(submitting) return
+    if (submitting) return
 
     //show loading / disable button
     showLoading(form)
@@ -152,10 +174,11 @@ export function initPostForm({ formId, defaultValues, onSubmit }) {
 
     const isValid = await validatePostForm(form, formValues)
     //validation js
-    if (!isValid) return
+    if (isValid) await onSubmit?.(formValues)
+    
 
     //trigger submit callback
-    await onSubmit?.(formValues)
+  
     //otherwise, show validation errors
     hideLoading(form)
     submitting = false
