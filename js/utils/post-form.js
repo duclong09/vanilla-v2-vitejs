@@ -2,6 +2,10 @@ import { setBackgroundImage, setTextContent } from './common'
 import { setFieldValue } from './common'
 import * as yup from 'yup'
 import { randomNumber } from '.'
+const ImageSource = {
+  PICSUM: 'picsum',
+  UPLOAD: 'upload',
+}
 
 function setFormValues(form, formValues) {
   setFieldValue(form, '[name="title"]', formValues?.title)
@@ -15,11 +19,6 @@ function setFormValues(form, formValues) {
 //create form value
 function getFormValues(form) {
   const formValues = {}
-  //v1 : query each input and add to values object
-  // ['title', 'author', 'description', 'imageUrl'].forEach((name) => {
-  //     const field = form.querySelector(`[name="${name}"]`)
-  //     if(field) formValues[name] = field.value
-  // })
 
   //v2: using form data
 
@@ -29,28 +28,6 @@ function getFormValues(form) {
   }
   return formValues
 }
-
-// function getTitleError(form) {
-//   const titleElement = form.querySelector('[name="title"]')
-//   if (!titleElement) return
-//   if (titleElement.validity.valueMissing) return 'Ooops! Please write a nice title for your post'
-
-//   if (titleElement.value.split(' ').filter((x) => !!x && x.length >= 3).length < 2) {
-//     return 'Please enter at least two words of 3 character'
-//   }
-//   return ''
-// }
-
-// function getAuthorError(form) {
-//   const authorElement = form.querySelector('[name="author"]')
-//   if (!authorElement) return
-//   if (authorElement.validity.valueMissing) return 'Please enter author of this post!'
-
-//   if (authorElement.value.split(' ').filter((x) => !!x && x.length >= 3).length < 2) {
-//     return 'Please enter at least two words of 3 character'
-//   }
-//   return ''
-// }
 
 function getPostSchema() {
   return yup.object().shape({
@@ -63,11 +40,25 @@ function getPostSchema() {
         'Please enter at least two words',
         (value) => value.split(' ').filter((x) => !!x && x.length >= 3).length >= 2
       ),
-    description: yup.string(),
-    imageUrl: yup
+    description: yup
+      .string(),
+    imageSource: yup
       .string()
-      .required('Please random a background image')
-      .url('Please enter a valid URL'),
+      .required('Please select an image source')
+      .oneOf([ImageSource.PICSUM, ImageSource.UPLOAD], 'Invalid image source'),
+    imageUrl: yup.string().when('imageSource', {
+      is: ImageSource.PICSUM,
+      then: yup
+        .string()
+        .required('Please random a background image')
+        .url('Please enter a valid URL'),
+    }),
+    image: yup.mixed().when('imageSource', {
+      is: ImageSource.UPLOAD,
+      then: yup
+        .mixed()
+        .test('required', 'Please select an image to upload', (value) => Boolean(value?.name)),
+    }),
   })
 }
 
@@ -80,22 +71,9 @@ function setFieldError(form, name, error) {
 }
 
 async function validatePostForm(form, formValues) {
-  //get errors
-  //   const errors = {
-  //     title: getTitleError(form),
-  //     author: getAuthorError(form),
-  //   }
-  //   //set errors
-  //   for (const key in errors) {
-  //     const element = form.querySelector(`[name="${key}"]`)
-  //     if (element) {
-  //       element.setCustomValidity(errors[key])
-  //       setTextContent(element.parentElement, '.invalid-feedback', errors[key])
-  //     }
-  //   }
   try {
     //reset previous errors
-    ;['title', 'author', 'imageUrl'].forEach((name) => setFieldError(form, name, ''))
+    ;['title', 'author', 'imageUrl', 'image'].forEach((name) => setFieldError(form, name, ''))
     //validation
     const schema = getPostSchema()
     await schema.validate(formValues, { abortEarly: false })
@@ -148,7 +126,7 @@ function initRandomImage(form) {
   })
 }
 
-function renderImageSourceControl(form, selectedValue) { 
+function renderImageSourceControl(form, selectedValue) {
   const controlList = form.querySelectorAll('[data-id="imageSource"]')
   controlList.forEach((control) => {
     control.hidden = control.dataset.imageSource !== selectedValue
@@ -162,6 +140,22 @@ function initRadioImageSource(form) {
   })
 }
 
+function initUploadImage(form) {
+  const uploadImage = form.querySelector('[name="image"]')
+  if (!uploadImage) return
+
+  uploadImage.addEventListener('change', (event) => {
+    console.log('selected file', event.target.files[0])
+    //get selected file
+    const file = event.target.files[0]
+    if (file) {
+      //preview
+      const imageUrl = URL.createObjectURL(file)
+      setBackgroundImage(document, '#postHeroImage', imageUrl)
+    }
+  })
+}
+
 export function initPostForm({ formId, defaultValues, onSubmit }) {
   const form = document.getElementById(formId)
   if (!form) return
@@ -172,6 +166,7 @@ export function initPostForm({ formId, defaultValues, onSubmit }) {
   //init Event
   initRandomImage(form)
   initRadioImageSource(form)
+  initUploadImage(form)
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault()
@@ -184,6 +179,7 @@ export function initPostForm({ formId, defaultValues, onSubmit }) {
     //console.log('form', form)
     //get form value
     const formValues = getFormValues(form)
+    console.log(formValues)
     //console.log(formValues)
     formValues.id = defaultValues.id
 

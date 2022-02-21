@@ -112,7 +112,9 @@
                     checked
                     value="picsum"
                   />
-                  <label class="form-check-label" for="imageSourcePicsum"> Random image using picsum.photos </label>
+                  <label class="form-check-label" for="imageSourcePicsum">
+                    Random image using picsum.photos
+                  </label>
                 </div>
                 <div class="form-check">
                   <input
@@ -121,7 +123,6 @@
                     name="imageSource"
                     id="imageSourceUpload"
                     value="upload"
-                    
                   />
                   <label class="form-check-label" for="imageSourceUpload">
                     Upload image from your computer
@@ -145,8 +146,15 @@
               </div>
 
               <div class="input-group mb-3" data-id="imageSource" data-image-source="upload" hidden>
-                <input name="image" type="file" class="form-control" id="uploadImage">
+                <input
+                  name="image"
+                  type="file"
+                  class="form-control"
+                  id="uploadImage"
+                  accept="image/*"
+                />
                 <label class="input-group-text" for="uploadImage">Upload</label>
+                <div class="invalid-feedback"></div>
               </div>
 
               <div class="text-center">
