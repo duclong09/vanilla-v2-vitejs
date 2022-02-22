@@ -74,7 +74,7 @@ export function renderPostList(elementId, postList) {
   //clear current list
   ulElement.textContent = ''
   postList.forEach((post, idx) => {
-    const liElement = createPostElement(post)
+    const liElement = createPostElement(post,idx)
     ulElement.appendChild(liElement)
   })
 }
