@@ -40,8 +40,7 @@ function getPostSchema() {
         'Please enter at least two words',
         (value) => value.split(' ').filter((x) => !!x && x.length >= 3).length >= 2
       ),
-    description: yup
-      .string(),
+    description: yup.string(),
     imageSource: yup
       .string()
       .required('Please select an image source')
@@ -57,7 +56,12 @@ function getPostSchema() {
       is: ImageSource.UPLOAD,
       then: yup
         .mixed()
-        .test('required', 'Please select an image to upload', (value) => Boolean(value?.name)),
+        .test('required', 'Please select an image to upload', (file) => Boolean(file?.name))
+        .test('max-3mb', 'The image is to large (max 3mb)', (file) => {
+          const fileSize = file?.size || 0
+          const MAX_SIZE = 3 * 1024 * 1024 //3mb
+          return fileSize <= MAX_SIZE
+        })
     }),
   })
 }
@@ -150,6 +154,7 @@ function initUploadImage(form) {
     const file = event.target.files[0]
     if (file) {
       //preview
+     
       const imageUrl = URL.createObjectURL(file)
       setBackgroundImage(document, '#postHeroImage', imageUrl)
     }
@@ -179,8 +184,7 @@ export function initPostForm({ formId, defaultValues, onSubmit }) {
     //console.log('form', form)
     //get form value
     const formValues = getFormValues(form)
-    console.log(formValues)
-    //console.log(formValues)
+
     formValues.id = defaultValues.id
 
     const isValid = await validatePostForm(form, formValues)
