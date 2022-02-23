@@ -61,7 +61,7 @@ function getPostSchema() {
           const fileSize = file?.size || 0
           const MAX_SIZE = 3 * 1024 * 1024 //3mb
           return fileSize <= MAX_SIZE
-        })
+        }),
     }),
   })
 }
@@ -99,6 +99,22 @@ async function validatePostForm(form, formValues) {
   const isValid = form.checkValidity()
   if (!isValid) form.classList.add('was-validated')
   return isValid
+}
+
+async function validateFormField(form, formValues, name) {
+  try {
+    //clear previos error
+    setFieldError(form, name, '')
+    const schema = getPostSchema()
+    await schema.validateAt(name, formValues)
+  } catch (error) {
+    setFieldError(form, name, error.message)
+  }
+
+  const field = form.querySelector(`[name="${name}"]`)
+  if (field && !field.checkValidity()) {
+    field.parentElement.classList.add('was-validated')
+  }
 }
 
 function showLoading(form) {
@@ -154,12 +170,27 @@ function initUploadImage(form) {
     const file = event.target.files[0]
     if (file) {
       //preview
-     
+
       const imageUrl = URL.createObjectURL(file)
       setBackgroundImage(document, '#postHeroImage', imageUrl)
+      validateFormField(form, { imageSource: ImageSource.UPLOAD, image: file }, 'image')
     }
   })
 }
+
+
+function initValidationAllChange(form){
+  ['title', 'author'].forEach((name) => {
+    const field = form.querySelector(`[name="${name}"]`)
+    if(field){
+      field.addEventListener('input', (event) => {
+        const newValue = event.target.value
+        validateFormField(form, {[name]: newValue}, name)
+      })
+    }
+  })
+}
+
 
 export function initPostForm({ formId, defaultValues, onSubmit }) {
   const form = document.getElementById(formId)
@@ -172,7 +203,7 @@ export function initPostForm({ formId, defaultValues, onSubmit }) {
   initRandomImage(form)
   initRadioImageSource(form)
   initUploadImage(form)
-
+  initValidationAllChange(form)
   form.addEventListener('submit', async (event) => {
     event.preventDefault()
     //prevent other submitssion
