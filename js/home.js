@@ -1,11 +1,10 @@
 import postApi from './api/postApi'
-import {initPagination,initSearch,renderPagination, renderPostList} from './utils'
+import {initPagination,initSearch,renderPagination, renderPostList, toast} from './utils'
 //to use formNow function
 async function handleFilterChange(filterName, filterValue) {
   try {
     const url = new URL(window.location)
-    url.searchParams.set(filterName, filterValue)
-
+    if(filterName) url.searchParams.set(filterName, filterValue)
     if (filterName === 'title_like') url.searchParams.set('_page', 1)
 
     history.pushState({}, '', url)
@@ -18,6 +17,27 @@ async function handleFilterChange(filterName, filterValue) {
   }
 }
 
+function registerPostDeleteEvent(){
+  document.addEventListener('post-delete', async (event) => {
+    //console.log('remove post clicl', event.detail)
+    //call api to remove post by id
+    //refetch data
+    try {
+      const post = event.detail
+      const message = `Are you sure to remove post "${post.title}"?`
+      if(window.confirm(message)){
+        await postApi.remove(post.id)
+        await handleFilterChange()
+        toast.success('Remove post successfully')
+      }
+    } catch (error) {
+      console.log('remove failed', error)
+      toast.error(error.message)
+    }
+  })
+}
+
+
 ;(async () => {
   try {
     const url = new URL(window.location)
@@ -27,7 +47,6 @@ async function handleFilterChange(filterName, filterValue) {
 
     history.pushState({}, '', url)
     const queryParams = url.searchParams
-
     initPagination({
       elementId: 'pagination',
       defaultParams: queryParams,
@@ -43,9 +62,11 @@ async function handleFilterChange(filterName, filterValue) {
     //const queryParams = getDefaultParams()
     //const queryParams = new URLSearchParams(window.location.search)
     //set defaul
-    const { data, pagination } = await postApi.getAll(queryParams)
-    renderPostList('postsList', data)
-    renderPagination( 'pagination',pagination)
+    // const { data, pagination } = await postApi.getAll(queryParams)
+    // renderPostList('postsList', data)
+    // renderPagination( 'pagination',pagination)
+    registerPostDeleteEvent()
+    handleFilterChange()
   } catch (error) {
     console.log('get all failed', error)
   }
