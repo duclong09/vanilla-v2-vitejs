@@ -56,11 +56,23 @@ export function createPostElement(post) {
     const editButton = liElement.querySelector('[data-id="edit"]')
     if(editButton){
       editButton.addEventListener('click', (e) => {
-        console.log('link edit form')
+        // console.log('link edit form')
         // e.stopPropagation()
         window.location.assign(`/add-edit-post.html?id=${post.id}`)
       })
     }
+
+    const removeButton = liElement.querySelector('[data-id="remove"]')
+    if(removeButton){
+      removeButton.addEventListener('click', () => {
+        const customEvent = new CustomEvent('post-delete', {
+          bubbles : true,
+          detail : post
+        })
+        removeButton.dispatchEvent(customEvent)
+      })
+    }
+
   }
  
   return liElement

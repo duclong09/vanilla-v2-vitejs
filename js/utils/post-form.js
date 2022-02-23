@@ -178,19 +178,17 @@ function initUploadImage(form) {
   })
 }
 
-
-function initValidationAllChange(form){
-  ['title', 'author'].forEach((name) => {
+function initValidationAllChange(form) {
+  ;['title', 'author'].forEach((name) => {
     const field = form.querySelector(`[name="${name}"]`)
-    if(field){
+    if (field) {
       field.addEventListener('input', (event) => {
         const newValue = event.target.value
-        validateFormField(form, {[name]: newValue}, name)
+        validateFormField(form, { [name]: newValue }, name)
       })
     }
   })
 }
-
 
 export function initPostForm({ formId, defaultValues, onSubmit }) {
   const form = document.getElementById(formId)
